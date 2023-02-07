@@ -35,7 +35,7 @@ ORDER BY 1,2
 -- Looing at countries with Highest Infection Rate vs Population
 SELECT location, population, MAX(total_cases) as HighestInfectionCount, MAX((total_cases/population))*100 AS PercentPopulationInfected
 FROM PortfolioProject.dbo.CovidDeaths
--- WHERE location like '%states%'
+-- WHERE location like '%korea%'
 GROUP BY location, population
 ORDER BY PercentPopulationInfected DESC
 
@@ -87,8 +87,8 @@ ORDER BY 1,2
 WITH PopvsVac (continent, location, date, population, new_vaccinations, RollingPeopleVaccinated)
 AS
 (
-SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
-, SUM(CONVERT(BIGINT, vac.new_vaccinations)) OVER (PARTITION BY dea.location ORDER BY dea.location, dea.DATE) AS RollingPeopleVaccinated
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_people_vaccinated_smoothed
+, SUM(CONVERT(BIGINT, vac.new_people_vaccinated_smoothed)) OVER (PARTITION BY dea.location ORDER BY dea.DATE) AS RollingPeopleVaccinated
 --, (RollingPeopleVaccinated/population)*100 AS PercentageVaccinated
 FROM PortfolioProject..CovidDeaths dea
 JOIN PortfolioProject..CovidVaccinations vac
@@ -109,13 +109,13 @@ continent nvarchar(255),
 location nvarchar(255),
 date datetime,
 population numeric,
-new_vaccinations numeric,
+new_people_vaccinated_smoothed numeric,
 RollingPeopleVaccinated numeric
 )
 
 INSERT INTO #PercentPopulationVaccinated
-SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
-, SUM(CONVERT(BIGINT, vac.new_vaccinations)) OVER (PARTITION BY dea.location ORDER BY dea.location, dea.DATE) AS RollingPeopleVaccinated
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_people_vaccinated_smoothed
+, SUM(CONVERT(BIGINT, vac.new_people_vaccinated_smoothed)) OVER (PARTITION BY dea.location ORDER BY dea.DATE) AS RollingPeopleVaccinated
 --, (RollingPeopleVaccinated/population)*100 AS PercentageVaccinated
 FROM PortfolioProject..CovidDeaths dea
 JOIN PortfolioProject..CovidVaccinations vac
@@ -129,8 +129,8 @@ FROM #PercentPopulationVaccinated
 
 -- Creating View to store data for later visualizations
 CREATE VIEW PercentPopulationVaccinated AS
-SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_vaccinations
-, SUM(CONVERT(BIGINT, vac.new_vaccinations)) OVER (PARTITION BY dea.location ORDER BY dea.location, dea.DATE) AS RollingPeopleVaccinated
+SELECT dea.continent, dea.location, dea.date, dea.population, vac.new_people_vaccinated_smoothed
+, SUM(CONVERT(BIGINT, vac.new_people_vaccinated_smoothed)) OVER (PARTITION BY dea.location ORDER BY dea.DATE) AS RollingPeopleVaccinated
 --, (RollingPeopleVaccinated/population)*100 AS PercentageVaccinated
 FROM PortfolioProject..CovidDeaths dea
 JOIN PortfolioProject..CovidVaccinations vac
