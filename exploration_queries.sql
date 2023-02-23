@@ -142,3 +142,13 @@ WHERE dea.continent IS NOT NULL
 
 SELECT *
 FROM PercentPopulationVaccinated
+
+
+-- Exploring the link between poverty and death rate
+SELECT DISTINCT vac.location, cast(vac.extreme_poverty as FLOAT) as extreme_poverty
+FROM PortfolioProject..CovidDeaths dea
+JOIN PortfolioProject..CovidVaccinations vac
+	ON dea.location = vac.location
+	AND dea.date = vac.date
+WHERE dea.continent IS NOT NULL
+ORDER BY cast(vac.extreme_poverty as FLOAT) DESC;
